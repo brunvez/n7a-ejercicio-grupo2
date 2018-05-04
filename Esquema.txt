@@ -1,0 +1,26 @@
+Factura:
+	- id: Long
+	- fecha: date
+	- total: BigDecimal
+	
+LineaFactura:
+	- id: Long
+	- idFactura: Long
+	- idProducto: Long
+	- precioUnitario: BigDecimal
+	- cantidad: int
+	
+End Points:
+GET 		/api/factura
+POST 		/api/factura
+ 
+GET 		/api/factura/{idFactura}
+PUT 		/api/factura/{idFactura}
+DELETE 		/api/factura/{idFactura}
+ 
+POST		/api/factura/{idFactura}/lineaFactura
+
+PUT 		/api/factura/{idFactura}/lineaFactura/{idLineaFactura}
+DELETE 		/api/factura/{idFactura}/lineaFactura/{idLineaFactura}
+
+Este enfoque permite gestionar (crear, editar, eliminar) cada entidad de forma independiente
