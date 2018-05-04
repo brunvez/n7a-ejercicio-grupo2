@@ -1,4 +1,4 @@
-package webApi;
+package com.Facturacion;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -30,12 +30,14 @@ public class Factura {
         this.date = date;
     }
 
-    public BigDecimal getTotal() {
+    public float getTotal() {
+        float total = 0;
+        for (int i = 0; i < this.lineas.size(); i++) {
+            Linea linea = this.lineas.get(i);
+            float totalLinea = linea.getCantidad() * linea.getPrecioUnitario();
+            total += totalLinea;
+        }
+        
         return total;
     }
-
-    public void setTotal(BigDecimal total) {
-        this.total = total;
-    }
-    private BigDecimal total;
 }

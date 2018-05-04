@@ -1,4 +1,4 @@
-package webApi;
+package com.Facturacion;
 
 import java.math.BigDecimal;
 
@@ -7,10 +7,10 @@ public class Linea {
     private Long id;
     private Long idFactura;
     private Long idProducto;
-    private BigDecimal precioUnitario;
+    private float precioUnitario;
     private int cantidad;
 
-    public Linea(Long idFactura, Long idProducto, BigDecimal precioUnitario, int cantidad) {
+    public Linea(Long idFactura, Long idProducto, float precioUnitario, int cantidad) {
         this.idFactura = idFactura;
         this.idProducto = idProducto;
         this.precioUnitario = precioUnitario;
@@ -41,11 +41,11 @@ public class Linea {
         this.idProducto = idProducto;
     }
 
-    public BigDecimal getPrecioUnitario() {
+    public float getPrecioUnitario() {
         return precioUnitario;
     }
 
-    public void setPrecioUnitario(BigDecimal precioUnitario) {
+    public void setPrecioUnitario(float precioUnitario) {
         this.precioUnitario = precioUnitario;
     }
 

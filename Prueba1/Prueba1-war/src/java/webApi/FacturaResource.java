@@ -1,9 +1,16 @@
 package webApi;
 
+import com.Facturacion.BillNotFoundException;
+import com.Facturacion.BillingBeanLocal;
+import com.Facturacion.Factura;
+import com.Facturacion.InvalidBillException;
+import com.Facturacion.Linea;
+import com.Facturacion.UnrecognizedCurrencyException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.Date;
+import javax.ejb.EJB;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -12,6 +19,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -19,6 +27,9 @@ import javax.ws.rs.core.UriInfo;
 
 @Path("facturas")
 public class FacturaResource {
+    
+    @EJB
+    private BillingBeanLocal billingBean;
 
     @Context
     private UriInfo context;
@@ -64,12 +75,22 @@ public class FacturaResource {
     @Produces("application/json")
     public Response postJson(String content) {
         Factura factura = gson.fromJson(content, Factura.class);
-        factura.setId(7847847848L);
+        try {
+            factura = billingBean.createFactura(factura);
         String facturaJson = gson.toJson(factura);
         return Response
             .status(Response.Status.OK)
             .entity(facturaJson)
             .build();
+        }
+        catch (InvalidBillException e) {
+            ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), 400);
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(gson.toJson(errorResponse))
+                    .build();
+        }
+        
     }
     
     @PUT
@@ -106,5 +127,36 @@ public class FacturaResource {
             .status(Response.Status.OK)
             .entity(lineaJson)
             .build();
+    }
+    
+    @PUT
+    @Path("{id}")
+    @Produces("application/json")
+    public Response getTotalInCurrency(@PathParam("id") Long id, @QueryParam("moneda") String moneda) {
+        try {
+            float convertedTotal = this.billingBean.getTotalInCurrency(id, moneda);
+            ConversionResponse response = new ConversionResponse(convertedTotal, moneda);
+            String jsonResponse = gson.toJson(response);
+            return Response
+                .status(Response.Status.OK)
+                .entity(jsonResponse)
+                .build(); 
+        }
+        catch (UnrecognizedCurrencyException e) {
+            ErrorResponse response = new ErrorResponse(e.getMessage(), 404);
+            String jsonResponse = gson.toJson(response);
+            return Response
+                .status(Response.Status.NOT_FOUND)
+                .entity(jsonResponse)
+                .build();
+        }
+        catch (BillNotFoundException e) {
+            ErrorResponse response = new ErrorResponse(e.getMessage(), 404);
+            String jsonResponse = gson.toJson(response);
+            return Response
+                .status(Response.Status.NOT_FOUND)
+                .entity(jsonResponse)
+                .build();
+        }
     }
 }
