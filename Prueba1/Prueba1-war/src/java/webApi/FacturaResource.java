@@ -1,7 +1,6 @@
 package webApi;
 
 import com.Facturacion.BillNotFoundException;
-import com.Facturacion.BillingBeanLocal;
 import com.Facturacion.Factura;
 import com.Facturacion.InvalidBillException;
 import com.Facturacion.Linea;
@@ -23,13 +22,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import com.Facturacion.FacturaBeanLocal;
+import java.util.Collection;
 
 
 @Path("facturas")
 public class FacturaResource {
     
     @EJB
-    private BillingBeanLocal billingBean;
+    private FacturaBeanLocal facturaBean;
 
     @Context
     private UriInfo context;
@@ -42,13 +43,7 @@ public class FacturaResource {
     @GET
     @Produces("application/json")
     public Response getJson() {
-        Factura factura1 = new Factura(new Date());
-        factura1.setId(Long.MAX_VALUE - 3);
-        Factura factura2 = new Factura(new Date());
-        factura2.setId(Long.MAX_VALUE);
-        ArrayList<Factura> facturas = new ArrayList<Factura>();
-        facturas.add(factura1);
-        facturas.add(factura2);
+        Collection<Factura> facturas = this.facturaBean.getFacturas();
         String facturasJson = gson.toJson(facturas);
         return Response
                 .status(Response.Status.OK)
@@ -60,13 +55,22 @@ public class FacturaResource {
     @Path("{id}")
     @Produces("application/json")
     public Response getJsonById(@PathParam("id") Long id) {
-        Factura factura1 = new Factura(new Date());
-        factura1.setId(id);
-        String facturaJson = gson.toJson(factura1);
-        return Response
-            .status(Response.Status.OK)
-            .entity(facturaJson)
-            .build();
+        try {
+            Factura factura = this.facturaBean.getFactura(id);
+            String facturasJson = gson.toJson(factura);
+            return Response
+                .status(Response.Status.OK)
+                .entity(facturasJson)
+                .build();
+        }
+        catch (BillNotFoundException e) {
+            ErrorResponse response = new ErrorResponse(e.getMessage(), 404);
+            String jsonResponse = gson.toJson(response);
+            return Response
+                .status(Response.Status.NOT_FOUND)
+                .entity(jsonResponse)
+                .build();
+        }
     }
     
     
@@ -76,12 +80,12 @@ public class FacturaResource {
     public Response postJson(String content) {
         Factura factura = gson.fromJson(content, Factura.class);
         try {
-            factura = billingBean.createFactura(factura);
-        String facturaJson = gson.toJson(factura);
-        return Response
-            .status(Response.Status.OK)
-            .entity(facturaJson)
-            .build();
+            factura = facturaBean.createFactura(factura);
+            String facturaJson = gson.toJson(factura);
+            return Response
+                .status(Response.Status.OK)
+                .entity(facturaJson)
+                .build();
         }
         catch (InvalidBillException e) {
             ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), 400);
@@ -129,12 +133,12 @@ public class FacturaResource {
             .build();
     }
     
-    @PUT
-    @Path("{id}")
+    @GET
+    @Path("{id}/total")
     @Produces("application/json")
     public Response getTotalInCurrency(@PathParam("id") Long id, @QueryParam("moneda") String moneda) {
         try {
-            float convertedTotal = this.billingBean.getTotalInCurrency(id, moneda);
+            float convertedTotal = this.facturaBean.getTotalInCurrency(id, moneda);
             ConversionResponse response = new ConversionResponse(convertedTotal, moneda);
             String jsonResponse = gson.toJson(response);
             return Response

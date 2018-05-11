@@ -20,6 +20,11 @@ public class Factura {
 
     public void setId(Long id) {
         this.id = id;
+        for (int i = 0; i < this.lineas.size(); i++) {
+            Linea linea = this.lineas.get(i);
+            linea.setId(new Long(i+1));
+            linea.setIdFactura(id);
+        }
     }
 
     public Date getDate() {

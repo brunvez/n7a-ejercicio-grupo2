@@ -23,7 +23,7 @@ public class ConverterBean implements ConverterBeanLocal {
     public float convertTo(String currency, float amount) throws UnrecognizedCurrencyException {
         if (this.cotizaciones.containsKey(currency)) {
             float exchange = this.cotizaciones.get(currency);
-            return amount * exchange;
+            return amount / exchange;
         }
         throw new UnrecognizedCurrencyException();
     }

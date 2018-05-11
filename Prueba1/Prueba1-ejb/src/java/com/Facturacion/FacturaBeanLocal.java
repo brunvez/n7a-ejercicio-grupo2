@@ -6,6 +6,7 @@
 
 package com.Facturacion;
 
+import java.util.Collection;
 import javax.ejb.Local;
 
 /**
@@ -13,9 +14,13 @@ import javax.ejb.Local;
  * @author user
  */
 @Local
-public interface BillingBeanLocal {
+public interface FacturaBeanLocal {
     public Factura createFactura(Factura factura) throws InvalidBillException;
     
     public float getTotalInCurrency(long billId, String currency) 
             throws UnrecognizedCurrencyException, BillNotFoundException;
+    
+    public Factura getFactura(long id) throws BillNotFoundException;
+    
+    public Collection<Factura> getFacturas();
 }

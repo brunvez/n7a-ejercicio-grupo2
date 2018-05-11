@@ -6,6 +6,7 @@
 
 package com.Facturacion;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ import javax.ejb.EJB;
 import javax.ejb.Singleton;
 
 @Singleton
-public class BillingBean implements BillingBeanLocal {
+public class FacturaBean implements FacturaBeanLocal {
     public static final float MIN_TOTAL = 1000;
     
     @EJB
@@ -56,5 +57,21 @@ public class BillingBean implements BillingBeanLocal {
         else {
             throw new BillNotFoundException();
         }
+    }
+
+    @Override
+    public Factura getFactura(long id) throws BillNotFoundException {
+        if (this.facturas.containsKey(id)) {
+            Factura factura = this.facturas.get(id);
+            return factura;
+        }
+        else {
+            throw new BillNotFoundException();
+        }
+    }
+    
+    @Override
+    public Collection<Factura> getFacturas() {
+        return this.facturas.values();
     }
 }
